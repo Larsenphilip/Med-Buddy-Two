@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Forms - Med Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #0066CC;
+            --primary-dark: #0052a3;
+            --secondary-color: #F3F4F6;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --white: #FFFFFF;
+            --border-color: #E5E7EB;
+            --danger-color: #EF4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--secondary-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-dark);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo span {
+            color: var(--text-dark);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-dark);
+        }
+
+        .nav-item.active {
+            background-color: #EFF6FF;
+            color: var(--primary-color);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        /* Forms Section */
+        .forms-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section-separator {
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-dark);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .category-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .category-icon {
+            color: var(--primary-color);
+        }
+
+        .counter-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .counter-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .counter-input {
+            width: 60px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .counter-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        /* Document Inputs */
+        .documents-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .document-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            /* Title, Date, File, Remove */
+            gap: 1rem;
+            align-items: end;
+            padding: 1rem;
+            background-color: #F9FAFB;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .input-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .input-field {
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+        }
+
+        .file-upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-upload-label {
+            border: 1px dashed var(--border-color);
+            background-color: var(--white);
+            color: var(--text-light);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background-color: #EFF6FF;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            /* Match input height */
+        }
+
+        .remove-btn:hover {
+            color: var(--danger-color);
+            background-color: #FEF2F2;
+        }
+
+        .submit-section {
+            margin-top: 2rem;
+            text-align: right;
+            padding-bottom: 4rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        @media (max-width: 768px) {
+            .document-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+
+            .sidebar {
+                display: none;
+                /* Simplification for mobile */
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.html" class="logo">
+            <i data-lucide="activity"></i>
+            <span>Med Buddy</span>
+        </a>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-item"><i data-lucide="layout-dashboard" class="nav-icon"></i> Dashboard</a>
+                </li>
+                <li><a href="#" class="nav-item active"><i data-lucide="file-text" class="nav-icon"></i> Forms</a></li>
+                <li><a href="#" class="nav-item"><i data-lucide="user" class="nav-icon"></i> My Profile</a></li>
+                <li><a href="#" class="nav-item"><i data-lucide="calendar" class="nav-icon"></i> Appointments</a></li>
+                <li><a href="#" class="nav-item"><i data-lucide="settings" class="nav-icon"></i> Settings</a></li>
+                <li><a href="index.html" class="nav-item" style="color: var(--danger-color);"><i data-lucide="log-out"
+                            class="nav-icon"></i> Logout</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1 class="page-title">Patient Forms</h1>
+            <div class="user-profile">
+                <!-- User avatar could go here -->
+            </div>
+        </div>
+
+        <div class="forms-container">
+
+            <form action="" method="POST" enctype="multipart/form-data">
+
+                <h2 class="section-separator">Document Uploads</h2>
+
+                <!-- Category 1: Medical Reports -->
+                <div class="category-card" id="card-reports">
+                    <div class="category-header">
+                        <div class="category-title">
+                            <i data-lucide="clipboard-list" class="category-icon"></i>
+                            Medical Reports
+                        </div>
+                        <div class="counter-wrapper">
+                            <label class="counter-label">Count:</label>
+                            <input type="number" min="0" max="10" placeholder="0" class="counter-input"
+                                oninput="updateFields('reports', this.value)">
+                        </div>
+                    </div>
+                    <div class="documents-list" id="list-reports">
+                        <!-- Dynamic fields will appear here -->
+                    </div>
+                </div>
+
+                <!-- Category 2: Scans -->
+                <div class="category-card" id="card-scans">
+                    <div class="category-header">
+                        <div class="category-title">
+                            <i data-lucide="scan" class="category-icon"></i>
+                            Medical Scans
+                        </div>
+                        <div class="counter-wrapper">
+                            <label class="counter-label">Count:</label>
+                            <input type="number" min="0" max="10" placeholder="0" class="counter-input"
+                                oninput="updateFields('scans', this.value)">
+                        </div>
+                    </div>
+                    <div class="documents-list" id="list-scans">
+                        <!-- Dynamic fields will appear here -->
+                    </div>
+                </div>
+
+                <!-- Category 3: Prescriptions -->
+                <div class="category-card" id="card-prescriptions">
+                    <div class="category-header">
+                        <div class="category-title">
+                            <i data-lucide="pill" class="category-icon"></i>
+                            Prescriptions
+                        </div>
+                        <div class="counter-wrapper">
+                            <label class="counter-label">Count:</label>
+                            <input type="number" min="0" max="10" placeholder="0" class="counter-input"
+                                oninput="updateFields('prescriptions', this.value)">
+                        </div>
+                    </div>
+                    <div class="documents-list" id="list-prescriptions">
+                        <!-- Dynamic fields will appear here -->
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="btn-primary">
+                        <i data-lucide="save"></i>
+                        Save All Documents
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        function updateFields(category, count) {
+            const container = document.getElementById(`list-${category}`);
+            const currentCount = container.children.length;
+            const targetCount = parseInt(count) || 0;
+
+            if (targetCount < 0) return; // specific handling for negative input if manual
+
+            if (targetCount > currentCount) {
+                // Add fields
+                for (let i = currentCount; i < targetCount; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'document-row';
+                    row.innerHTML = `
+                        <div class="input-group">
+                            <label class="input-label">Document Title</label>
+                            <input type="text" class="input-field" name="${category}_title[]" placeholder="e.g. Blood Test Report">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Date</label>
+                            <input type="date" class="input-field" name="${category}_date[]">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">File</label>
+                            <div class="file-upload-btn-wrapper">
+                                <label class="file-upload-label">
+                                    <i data-lucide="upload" style="width:16px; height:16px;"></i> Choose
+                                    <input type="file" class="file-input" name="${category}_file[]" onchange="window.updateFileName(this)">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                           <label class="input-label">&nbsp;</label>
+                           <button type="button" class="remove-btn" onclick="removeRow(this, '${category}')" title="Remove">
+                                <i data-lucide="trash-2" style="width:18px; height:18px;"></i>
+                           </button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                    lucide.createIcons({ root: row }); // Re-init icons for new content
+                }
+            } else if (targetCount < currentCount) {
+                // Remove fields from the bottom
+                while (container.children.length > targetCount) {
+                    container.removeChild(container.lastChild);
+                }
+            }
+        }
+
+        // Helper to update the file label when a file is chosen
+        window.updateFileName = function (input) {
+            const label = input.parentElement;
+
+            if (input.files && input.files[0]) {
+                const fName = input.files[0].name;
+                const display = fName.length > 12 ? fName.substring(0, 9) + '...' : fName;
+
+                // Clear and rebuild content
+                // <i...> Choose <input> => <i check> display <input>
+
+                // Remove existing check icon if any
+                const existingIcon = label.querySelector('svg');
+                if (existingIcon) existingIcon.remove();
+
+                // Remove text node " Choose"
+                // It's easier to just reset innerHTML but we must keep the input element alive if we want to retain the file selection?
+                // Actually, replacing innerHTML destroys the input and its selection.
+                // So we must manipulate DOM nodes.
+
+                // 1. Find the icon and update it
+                // We'll just reset everything except the input.
+
+                // Simpler approach:
+                // We will rely on textContent and re-insert checks.
+
+                // Let's assume the structure is consistent: [icon, text, input]
+                // We will change properties.
+
+                label.style.borderColor = 'var(--primary-color)';
+                label.style.backgroundColor = '#EFF6FF';
+
+                // Update Text
+                // Find the text node (nodeType 3)
+                let textNode = null;
+                label.childNodes.forEach(n => {
+                    if (n.nodeType === 3 && n.textContent.trim().length > 0) textNode = n;
+                });
+
+                if (textNode) {
+                    textNode.textContent = " " + display;
+                } else {
+                    // Create one? The original HTML had " Choose"
+                    // If we removed it, we add it back.
+                    // If we update it, good.
+                }
+
+                // Update Icon to Check
+                // We'll perform a query selector for the <i> or <svg>
+                // Note: lucide transforms <i> to <svg>
+                const iconSvg = label.querySelector('svg');
+                if (iconSvg) {
+                    // We can't easily change SVG path unless we re-run lucide or replace html.
+                    // Let's replace the SVG with a Check SVG string manually or use lucide attributes if dynamic (not really without react).
+                    // Replace the SVG outerHTML
+                    const checkIconHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="green" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+                    iconSvg.outerHTML = checkIconHTML;
+                }
+            }
+        }
+
+        // Handle Row Removal updating the counter
+        window.removeRow = function (btn, category) {
+            const row = btn.closest('.document-row');
+            row.remove();
+
+            // Update the counter input
+            const container = document.getElementById(`list-${category}`);
+            const input = document.querySelector(`#card-${category} .counter-input`);
+            input.value = container.children.length;
+        }
+    </script>
+</body>
+
+</html>

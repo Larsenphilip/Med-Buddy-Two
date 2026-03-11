@@ -1,0 +1,38 @@
+# Environment variables
+.env
+
+# Dependencies
+vendor/
+node_modules/
+
+# User uploads
+uploads/
+
+# Database dumps/data
+DB/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs and temp files
+*.log
+tmp/
+temp/
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+.venv
