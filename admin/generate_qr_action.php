@@ -24,7 +24,16 @@ $command = "$venv_python \"$script_path\" " . escapeshellarg($patient_id) . " 2>
 $output = shell_exec($command);
 $result = json_decode($output, true);
 
-if ($result) {
+if ($result && isset($result['success']) && $result['success'] === true) {
+    // 5. Update Status in Database
+    require_once '../db_config.php';
+    $update_sql = "UPDATE patients SET qr_status = 1 WHERE patient_id = ?";
+    $stmt = $conn->prepare($update_sql);
+    if ($stmt) {
+        $stmt->bind_param("s", $patient_id);
+        $stmt->execute();
+        $stmt->close();
+    }
     echo json_encode($result);
 } else {
     echo json_encode(["success" => false, "error" => "Failed to execute QR generation system", "raw" => $output]);

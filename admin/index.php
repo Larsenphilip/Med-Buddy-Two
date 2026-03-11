@@ -85,194 +85,356 @@ $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Su
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard - Med Buddy</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Using Remix Icon -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
     <style>
         :root {
             --primary-color: #0066CC;
-            --secondary-color: #f4fdf0; /* Matching green theme background */
-            --white: #ffffff;
+            --primary-hover: #004C99;
+            --secondary-color: #E6F4FF;
+            --accent-color: #00D2D3;
             --text-dark: #1F2937;
-            --border-color: #e5e7eb;
+            --text-light: #6B7280;
+            --white: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --border-color: #E5E7EB;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+            --dashboard-bg: #F8FAFC;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            background-color: #f9fafb;
-            display: flex;
+            background-color: var(--dashboard-bg);
+            color: var(--text-dark);
             height: 100vh;
+            display: flex;
+            overflow: hidden;
         }
 
-        /* Sidebar */
+        /* --- Sidebar --- */
         .sidebar {
-            width: 250px;
-            background-color: var(--white);
-            border-right: 1px solid var(--border-color);
-            padding: 2rem;
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
         }
 
         .logo {
             font-size: 1.5rem;
             font-weight: 800;
             color: var(--primary-color);
-            margin-bottom: 3rem;
-        }
-
-        .menu-item {
-            padding: 0.75rem 1rem;
-            color: var(--text-dark);
             text-decoration: none;
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.5px;
+            margin-bottom: 3rem;
+            padding-left: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--text-dark);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            text-decoration: none;
+            color: var(--text-light);
             font-weight: 500;
+            padding: 0.85rem 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
         }
 
-        .menu-item.active {
-            background-color: var(--secondary-color);
-            color: var(--primary-color);
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
         }
 
-        .menu-item:hover {
-            background-color: #f3f4f6;
+        .sidebar-menu a i {
+            font-size: 1.25rem;
         }
 
-        .logout {
+        .logout-btn {
             margin-top: auto;
-            color: red;
+            color: #ef4444 !important;
         }
 
-        /* Main Content */
+        .logout-btn:hover {
+            background-color: #fee2e2 !important;
+            color: #ef4444 !important;
+            box-shadow: none !important;
+        }
+
+        /* --- Main Content --- */
         .main-content {
+            margin-left: var(--sidebar-width);
             flex: 1;
-            padding: 2rem;
+            height: 100vh;
             overflow-y: auto;
+            position: relative;
         }
 
-        .header {
+        /* --- Header --- */
+        .top-bar {
+            height: var(--header-height);
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .top-bar-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .doc-id span {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* --- Dashboard UI --- */
+        .dashboard-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--secondary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-details h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-details .spec {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-item span:first-child {
+            color: var(--text-light);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .info-item span:last-child {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* --- Appointment Section --- */
+        .section-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
         }
 
-        .card {
-            background: var(--white);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        h2 {
-            margin-top: 0;
-            color: var(--text-dark);
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
+        .section-title i {
+            color: var(--primary-color);
         }
 
-        /* Table */
+        /* --- Modern Table --- */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        th, td {
-            text-align: left;
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
         th {
-            background-color: #f9fafb;
-            font-weight: 600;
-        }
-
-        .status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
+            text-align: left;
+            padding: 1.25rem 1rem;
             font-size: 0.85rem;
-            font-weight: 500;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-light);
+            background: #f8fafc;
+            border-bottom: 2px solid var(--border-color);
         }
 
-        .status-Pending { background-color: #FEF3C7; color: #D97706; }
-        .status-Confirmed { background-color: #D1FAE5; color: #059669; }
-        .status-Cancelled { background-color: #FEE2E2; color: #DC2626; }
+        td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-Pending { background: #fee2e2; color: #ef4444; }
+        .status-Confirmed { background: #dcfce7; color: #16a34a; }
+        .status-Cancelled { background: #f3f4f6; color: #4b5563; }
 
         .btn-action {
-            padding: 0.4rem 0.8rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
             text-decoration: none;
-            margin-right: 0.5rem;
-        }
-        
-        .btn-confirm { background-color: #059669; color: white; }
-        .btn-cancel { background-color: #DC2626; color: white; }
-
-        /* Availability Form */
-        .availability-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f9fafb;
-            border-radius: 6px;
-        }
-        
-        .availability-row h4 { margin: 0; width: 100px; }
-        
-        input[type="time"] {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            transition: var(--transition);
+            display: inline-block;
         }
 
-        .btn-save {
+        .btn-confirm {
             background-color: var(--primary-color);
             color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .alert {
-            padding: 1rem;
-            background-color: #D1FAE5;
-            color: #059669;
-            border-radius: 6px;
-            margin-bottom: 1rem;
+            margin-right: 0.5rem;
         }
 
-        /* Toggle Switch */
+        .btn-confirm:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-cancel {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+
+        .btn-cancel:hover {
+            background-color: #fecaca;
+        }
+
+        /* --- Availability Controls --- */
+        .availability-table {
+            width: 100%;
+        }
+
+        .availability-row td {
+            padding: 1.5rem 1rem;
+        }
+
+        .day-name {
+            font-weight: 700;
+            font-size: 1rem;
+            width: 150px;
+        }
+
+        /* Switch Styling */
         .switch {
             position: relative;
             display: inline-block;
-            width: 50px;
+            width: 48px;
             height: 24px;
         }
 
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
 
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e5e7eb;
             transition: .4s;
             border-radius: 24px;
         }
@@ -280,229 +442,278 @@ $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Su
         .slider:before {
             position: absolute;
             content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
             background-color: white;
-            -webkit-transition: .4s;
             transition: .4s;
             border-radius: 50%;
         }
 
-        input:checked + .slider {
-            background-color: var(--primary-color);
-        }
-
-        input:focus + .slider {
-            box-shadow: 0 0 1px var(--primary-color);
-        }
-
-        input:checked + .slider:before {
-            -webkit-transform: translateX(26px);
-            -ms-transform: translateX(26px);
-            transform: translateX(26px);
-        }
-
-        .day-label {
-            width: 120px;
-            font-weight: 600;
-        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(24px); }
 
         .time-inputs {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            transition: opacity 0.3s;
+            gap: 1.5rem;
+            transition: var(--transition);
         }
 
         .time-inputs.disabled {
-            opacity: 0.5;
+            opacity: 0.3;
             pointer-events: none;
         }
 
-        .availability-table {
-            width: 100%;
-            margin-bottom: 2rem;
-        }
-
-        .availability-table td {
-            padding: 1.25rem 1rem;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .save-all-container {
+        .time-group {
             display: flex;
-            justify-content: flex-end;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #eee;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .btn-save-all {
+        .time-group label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        input[type="time"] {
+            border: 1.5px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            outline: none;
+        }
+
+        input[type="time"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .btn-save-schedule {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 1rem 2.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
             cursor: pointer;
+            transition: var(--transition);
             box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
-            transition: all 0.3s;
+            float: right;
         }
 
-        .btn-save-all:hover {
+        .btn-save-schedule:hover {
+            background-color: var(--primary-hover);
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
         }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #16a34a;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="logo">Med Buddy</div>
-        <a href="#appointments" class="menu-item active">Appointments</a>
-        <a href="#availability" class="menu-item">My Schedule</a>
-        <a href="search_patient.php" class="menu-item">Patient Results</a>
-        <a href="logout.php" class="menu-item logout">Logout</a>
-    </div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.php" class="logo">
+            <i class="ri-heart-pulse-fill"></i>
+            <span>Med Buddy</span>
+        </a>
 
-    <div class="main-content">
-        <div class="header">
-            <h1>Welcome, <?php echo htmlspecialchars($doctor_name); ?></h1>
-        </div>
-        
-        <?php if(isset($success_msg)) echo "<div class='alert'>$success_msg</div>"; ?>
+        <ul class="sidebar-menu">
+            <li><a href="#appointments" class="active"><i class="ri-calendar-check-line"></i> Appointments</a></li>
+            <li><a href="#availability"><i class="ri-time-line"></i> My Schedule</a></li>
+            <li><a href="search_patient.php"><i class="ri-folder-user-line"></i> Patient Results</a></li>
+            <li><a href="logout.php" class="logout-btn"><i class="ri-logout-box-line"></i> Logout</a></li>
+        </ul>
+    </aside>
 
-        <!-- Profile Section -->
-        <div class="card" style="display: flex; align-items: start; gap: 2rem;">
-            <div style="flex-shrink: 0;">
-                <?php 
-                $img_src = !empty($doctor_data['image_path']) ? "../" . $doctor_data['image_path'] : "https://via.placeholder.com/150";
-                ?>
-                <img src="<?php echo htmlspecialchars($img_src); ?>" alt="Doctor Photo" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #E6F4FF;">
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <div class="top-bar">
+            <div class="top-bar-info">
+                <div class="doc-id">Doctor ID: <span><?php echo htmlspecialchars($doctor_data['doctor_identity'] ?? 'N/A'); ?></span></div>
+                <div class="user-profile">
+                    <i class="ri-user-3-line"></i>
+                    <span>Welcome, Dr. <?php echo htmlspecialchars($firstName ?? explode(' ', $doctor_name)[0]); ?></span>
+                </div>
             </div>
-            <div>
-                <h2 style="border: none; margin-bottom: 0.5rem; padding-bottom: 0;"><?php echo htmlspecialchars($doctor_data['name']); ?></h2>
-                <p style="margin: 0 0 1rem; color: #666; font-weight: 500;">
-                    <?php echo htmlspecialchars($doctor_data['specialization']); ?> | 
-                    ID: <span style="color: var(--primary-color); font-weight: 700;"><?php echo htmlspecialchars($doctor_data['doctor_identity'] ?? 'N/A'); ?></span>
-                </p>
+        </div>
+
+        <div class="dashboard-container">
+            <?php if(isset($success_msg)): ?>
+            <div class="alert-success">
+                <i class="ri-checkbox-circle-line"></i> <?php echo $success_msg; ?>
+            </div>
+            <?php endif; ?>
+
+            <!-- Doctor Profile Card -->
+            <div class="profile-card">
+                <?php 
+                $img_src = !empty($doctor_data['image_path']) ? "../" . $doctor_data['image_path'] : "https://ui-avatars.com/api/?name=Doctor&background=E6F4FF&color=0066CC";
+                ?>
+                <img src="<?php echo htmlspecialchars($img_src); ?>" alt="Doctor" class="profile-photo" loading="lazy" width="120" height="120" onerror="this.src='https://ui-avatars.com/api/?name=Doctor&background=E6F4FF&color=0066CC'">
                 
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; font-size: 0.95rem;">
-                    <div>
-                        <strong>Email:</strong> <?php echo htmlspecialchars($doctor_data['email']); ?>
-                    </div>
-                    <div>
-                        <strong>Phone:</strong> <?php echo htmlspecialchars($doctor_data['phone_number'] ?? 'N/A'); ?>
-                    </div>
-                    <div>
-                        <strong>Work Type:</strong> <?php echo htmlspecialchars($doctor_data['work_type'] ?? 'N/A'); ?>
-                    </div>
+                <div class="profile-details">
+                    <h2>Dr. <?php echo htmlspecialchars($doctor_data['name']); ?></h2>
+                    <p class="spec"><?php echo htmlspecialchars($doctor_data['specialization']); ?></p>
                     
-                    <?php if(($doctor_data['work_type'] ?? '') == 'Clinic'): ?>
-                    <div>
-                        <strong>Clinic:</strong> <?php echo htmlspecialchars($doctor_data['clinic_name'] ?? ''); ?>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span>Email Address</span>
+                            <span><?php echo htmlspecialchars($doctor_data['email']); ?></span>
+                        </div>
+                        <div class="info-item">
+                            <span>Phone Number</span>
+                            <span><?php echo htmlspecialchars($doctor_data['phone_number'] ?? 'N/A'); ?></span>
+                        </div>
+                        <div class="info-item">
+                            <span>Work Type</span>
+                            <span><?php echo htmlspecialchars($doctor_data['work_type'] ?? 'N/A'); ?></span>
+                        </div>
+                        <?php if(($doctor_data['work_type'] ?? '') == 'Clinic'): ?>
+                        <div class="info-item">
+                            <span>Clinic Name</span>
+                            <span><?php echo htmlspecialchars($doctor_data['clinic_name'] ?? 'N/A'); ?></span>
+                        </div>
+                        <?php else: ?>
+                        <div class="info-item">
+                            <span>Hospital Name</span>
+                            <span><?php echo htmlspecialchars($doctor_data['hospital_name'] ?? 'N/A'); ?></span>
+                        </div>
+                        <?php endif; ?>
                     </div>
-                    <div>
-                        <strong>Timings:</strong> <?php echo htmlspecialchars($doctor_data['clinic_timings'] ?? ''); ?>
-                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Grid -->
+            <section id="appointments" class="section-card">
+                <div class="section-header">
+                    <h3 class="section-title"><i class="ri-calendar-event-line"></i> Upcoming Appointments</h3>
+                </div>
+
+                <div class="table-wrapper">
+                    <?php if ($appointments->num_rows > 0): ?>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Patient Name</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while($appt = $appointments->fetch_assoc()): ?>
+                            <tr>
+                                <td><i class="ri-calendar-line"></i> <?php echo date('d M, Y', strtotime($appt['appointment_date'])); ?></td>
+                                <td><i class="ri-time-line"></i> <?php echo date('h:i A', strtotime($appt['appointment_time'])); ?></td>
+                                <td style="color: var(--primary-color); font-weight: 700;"><?php echo htmlspecialchars($appt['patient_name']); ?></td>
+                                <td><?php echo htmlspecialchars($appt['patient_phone']); ?></td>
+                                <td>
+                                    <span class="status-badge status-<?php echo $appt['status']; ?>">
+                                        <?php if($appt['status'] == 'Pending') echo '<i class="ri-loader-4-line"></i>'; ?>
+                                        <?php if($appt['status'] == 'Confirmed') echo '<i class="ri-checkbox-circle-line"></i>'; ?>
+                                        <?php if($appt['status'] == 'Cancelled') echo '<i class="ri-close-circle-line"></i>'; ?>
+                                        <?php echo $appt['status']; ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if($appt['status'] == 'Pending'): ?>
+                                    <a href="?action=confirm&id=<?php echo $appt['id']; ?>" class="btn-action btn-confirm">Confirm</a>
+                                    <a href="?action=cancel&id=<?php echo $appt['id']; ?>" class="btn-action btn-cancel">Cancel</a>
+                                    <?php else: ?>
+                                    <span style="color: var(--text-light); font-size: 0.8rem;">Action Taken</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
                     <?php else: ?>
-                    <div>
-                        <strong>Hospital:</strong> <?php echo htmlspecialchars($doctor_data['hospital_name'] ?? ''); ?>
-                    </div>
-                    <div>
-                        <strong>Designation:</strong> <?php echo htmlspecialchars($doctor_data['designation'] ?? ''); ?>
+                    <div style="text-align: center; padding: 4rem 1rem;">
+                        <i class="ri-calendar-check-line" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem; display: block;"></i>
+                        <p style="color: var(--text-light); font-weight: 500;">No appointments scheduled for you yet.</p>
                     </div>
                     <?php endif; ?>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- Appointments Section -->
-        <div id="appointments" class="card">
-            <h2>Upcoming Appointments</h2>
-            <?php if ($appointments->num_rows > 0): ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Patient Name</th>
-                        <th>Phone</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while($appt = $appointments->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $appt['appointment_date']; ?></td>
-                        <td><?php echo date('h:i A', strtotime($appt['appointment_time'])); ?></td>
-                        <td><?php echo htmlspecialchars($appt['patient_name']); ?></td>
-                        <td><?php echo htmlspecialchars($appt['patient_phone']); ?></td>
-                        <td><span class="status status-<?php echo $appt['status']; ?>"><?php echo $appt['status']; ?></span></td>
-                        <td>
-                            <?php if($appt['status'] == 'Pending'): ?>
-                            <a href="?action=confirm&id=<?php echo $appt['id']; ?>" class="btn-action btn-confirm">Confirm</a>
-                            <a href="?action=cancel&id=<?php echo $appt['id']; ?>" class="btn-action btn-cancel">Cancel</a>
-                            <?php else: ?>
-                            --
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-            <?php else: ?>
-                <p>No appointments found.</p>
-            <?php endif; ?>
-        </div>
-
-        <!-- Availability Section -->
-        <div id="availability" class="card">
-            <h2>Manage Weekly Availability</h2>
-            <p style="margin-bottom: 2rem; color: #666;">Toggle your availability and set working hours for the entire week.</p>
-            
-            <form method="POST">
-                <table class="availability-table">
-                    <tbody>
-                        <?php foreach($days as $day): 
-                            $avail_data = isset($availability[$day]) ? $availability[$day] : null;
-                            $is_avail = ($avail_data && isset($avail_data['availability'])) ? $avail_data['availability'] : 0;
-                            $start = $avail_data ? $avail_data['start_time'] : '09:00';
-                            $end = $avail_data ? $avail_data['end_time'] : '17:00';
-                        ?>
-                        <tr>
-                            <td class="day-label"><?php echo $day; ?></td>
-                            <td style="width: 80px;">
-                                <label class="switch">
-                                    <input type="checkbox" name="days[<?php echo $day; ?>][is_available]" 
-                                           onchange="toggleDayRow(this, '<?php echo $day; ?>')"
-                                           <?php echo $is_avail ? 'checked' : ''; ?>>
-                                    <span class="slider"></span>
-                                </label>
-                            </td>
-                            <td>
-                                <div class="time-inputs <?php echo $is_avail ? '' : 'disabled'; ?>" id="inputs-<?php echo $day; ?>">
-                                    <label>From:</label>
-                                    <input type="time" name="days[<?php echo $day; ?>][start_time]" value="<?php echo date('H:i', strtotime($start)); ?>">
-                                    <label>To:</label>
-                                    <input type="time" name="days[<?php echo $day; ?>][end_time]" value="<?php echo date('H:i', strtotime($end)); ?>">
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                
-                <div class="save-all-container">
-                    <button type="submit" name="save_all_availability" class="btn-save-all">Save Weekly Schedule</button>
+            <!-- Schedule Management -->
+            <section id="availability" class="section-card">
+                <div class="section-header">
+                    <h3 class="section-title"><i class="ri-history-line"></i> Manage Weekly Schedule</h3>
                 </div>
-            </form>
+                <p style="color: var(--text-light); margin-bottom: 2rem; font-size: 0.95rem;">Configure your working hours for each day. Patients will only be able to book during these slots.</p>
+
+                <form method="POST">
+                    <table class="availability-table">
+                        <tbody>
+                            <?php foreach($days as $day): 
+                                $avail_data = isset($availability[$day]) ? $availability[$day] : null;
+                                $is_avail = ($avail_data && isset($avail_data['availability'])) ? $avail_data['availability'] : 0;
+                                $start = $avail_data ? $avail_data['start_time'] : '09:00';
+                                $end = $avail_data ? $avail_data['end_time'] : '17:00';
+                            ?>
+                            <tr class="availability-row">
+                                <td class="day-name"><?php echo $day; ?></td>
+                                <td style="width: 80px;">
+                                    <label class="switch">
+                                        <input type="checkbox" name="days[<?php echo $day; ?>][is_available]" 
+                                               onchange="toggleDayRow(this, '<?php echo $day; ?>')"
+                                               <?php echo $is_avail ? 'checked' : ''; ?>>
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="time-inputs <?php echo $is_avail ? '' : 'disabled'; ?>" id="inputs-<?php echo $day; ?>">
+                                        <div class="time-group">
+                                            <label>Start From</label>
+                                            <input type="time" name="days[<?php echo $day; ?>][start_time]" value="<?php echo date('H:i', strtotime($start)); ?>">
+                                        </div>
+                                        <div class="time-group">
+                                            <label>End At</label>
+                                            <input type="time" name="days[<?php echo $day; ?>][end_time]" value="<?php echo date('H:i', strtotime($end)); ?>">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 2rem; overflow: hidden;">
+                        <button type="submit" name="save_all_availability" class="btn-save-schedule">
+                            <i class="ri-save-line"></i> Save Weekly Schedule
+                        </button>
+                    </div>
+                </form>
+            </section>
+
         </div>
-    </div>
+        
+        <?php include '../footer.php'; ?>
+    </main>
 
     <script>
         function toggleDayRow(checkbox, day) {
@@ -513,6 +724,14 @@ $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Su
                 inputs.classList.add('disabled');
             }
         }
+
+        // Sidebar active state logic
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
     </script>
 
 </body>

@@ -51,6 +51,51 @@ if (!empty($patient['date_of_birth'])) {
 $fullName = $patient['full_name'] ?? '';
 $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
 
+// Fetch latest upcoming appointment
+$upcomingAppointment = null;
+if (!empty($patient['phone_number']) || !empty($patient['email'])) {
+    $apptSql = "SELECT a.*, d.name AS doctor_name, d.specialization, d.image_path 
+                FROM appointments a 
+                JOIN doctors d ON a.doctor_id = d.id 
+                WHERE (a.patient_phone = ? OR a.patient_email = ?) 
+                AND a.appointment_date >= CURDATE()
+                AND a.status != 'Cancelled'
+                ORDER BY a.appointment_date ASC, a.appointment_time ASC 
+                LIMIT 1";
+    $apptStmt = $conn->prepare($apptSql);
+    if ($apptStmt) {
+        $pPhone = $patient['phone_number'] ?? '';
+        $pEmail = $patient['email'] ?? '';
+        $apptStmt->bind_param("ss", $pPhone, $pEmail);
+        $apptStmt->execute();
+        $apptResult = $apptStmt->get_result();
+        $upcomingAppointment = $apptResult->fetch_assoc();
+        $apptStmt->close();
+    }
+}
+
+// Fetch all doctor visits (history)
+$allVisits = [];
+if (!empty($patient['phone_number']) || !empty($patient['email']) || !empty($patient['patient_id'])) {
+    $visitsSql = "SELECT a.*, d.name AS doctor_name, d.specialization, d.image_path 
+                  FROM appointments a 
+                  JOIN doctors d ON a.doctor_id = d.id 
+                  WHERE (a.patient_phone = ? OR a.patient_email = ? OR a.patient_id = ?) 
+                  ORDER BY a.appointment_date DESC, a.appointment_time DESC";
+    $visitsStmt = $conn->prepare($visitsSql);
+    if ($visitsStmt) {
+        $pPhone = $patient['phone_number'] ?? '';
+        $pEmail = $patient['email'] ?? '';
+        $pID = $patient['patient_id'] ?? '';
+        $visitsStmt->bind_param("sss", $pPhone, $pEmail, $pID);
+        $visitsStmt->execute();
+        $visitsResult = $visitsStmt->get_result();
+        while ($row = $visitsResult->fetch_assoc()) {
+            $allVisits[] = $row;
+        }
+        $visitsStmt->close();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,8 +104,11 @@ $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Profile - Med Buddy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Using Remix Icon -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
     <style>
@@ -755,6 +803,12 @@ $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
                         a.click();
                         document.body.removeChild(a);
                     };
+
+                    // Update main button text dynamically
+                    const mainBtn = document.getElementById('generateQRBtn');
+                    if (mainBtn) {
+                        mainBtn.innerHTML = '<i class="ri-qr-code-line"></i> View QR Code';
+                    }
                 } else {
                     alert('QR Generation Failed: ' + (data.error || 'Server error'));
                     modal.style.display = 'none';
@@ -782,7 +836,7 @@ $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
             <li><a href="#" class="active"><i class="ri-user-settings-fill"></i> My Profile</a></li>
            <!-- <li><a href="#"><i class="ri-file-user-line"></i> My Profile</a></li> -->
             <li><a href="appointment.php"><i class="ri-calendar-check-line"></i> Book Appointment</a></li>
-            <li><a href="#"><i class="ri-notification-3-line"></i> Notifications</a></li>
+          <!--  <li><a href="#"><i class="ri-notification-3-line"></i> Notifications</a></li> -->
         </ul>
     </aside>
 
@@ -793,7 +847,7 @@ $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
             <div class="top-bar-info">
                 <div class="patient-id">Patient ID: <span><?php echo htmlspecialchars($patient_id); ?></span></div>
                 <button id="generateQRBtn" onclick="generateMyQR(event)" class="qr-btn" style="background: var(--primary-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                    <i class="ri-qr-code-line"></i> Generate QR Code
+                    <i class="ri-qr-code-line"></i> <?php echo (isset($patient['qr_status']) && $patient['qr_status'] == 1) ? 'View QR Code' : 'Generate QR Code'; ?>
                 </button>
                 <div class="user-profile">
                     <span>Welcome, <?php echo displayField($patient['full_name']); ?></span> | <a href="logout.php"
@@ -848,26 +902,44 @@ $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
                 <div class="appointment-card">
                     <div class="card-header">
                         <h3>Upcoming Appointment</h3>
-                        <a href="#"><i class="ri-arrow-right-line" style="color: var(--text-light);"></i></a>
+                        <a href="appointment.php"><i class="ri-arrow-right-line" style="color: var(--text-light);"></i></a>
                     </div>
 
-                    <div class="doctor-preview">
-                        <div class="doc-avatar">👨‍⚕️</div>
-                        <div class="doc-info">
-                            <h4>Dr. Mehta</h4>
-                            <p>Cardiologist</p>
+                    <?php if ($upcomingAppointment): ?>
+                        <div class="doctor-preview">
+                            <div class="doc-avatar">
+                                <?php if (!empty($upcomingAppointment['image_path']) && file_exists($upcomingAppointment['image_path'])): ?>
+                                    <img src="<?php echo htmlspecialchars($upcomingAppointment['image_path']); ?>" alt="Doctor" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                <?php else: ?>
+                                    👨‍⚕️
+                                <?php endif; ?>
+                            </div>
+                            <div class="doc-info">
+                                <h4><?php echo htmlspecialchars($upcomingAppointment['doctor_name']); ?></h4>
+                                <p><?php echo htmlspecialchars($upcomingAppointment['specialization']); ?></p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="appt-meta">
-                        <span>Date: 25/04/2024</span>
-                        <span>10:00 AM</span>
-                    </div>
+                        <div class="appt-meta">
+                            <span>Date: <?php echo date('d/m/Y', strtotime($upcomingAppointment['appointment_date'])); ?></span>
+                            <span>Time: <?php echo date('h:i A', strtotime($upcomingAppointment['appointment_time'])); ?></span>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <span class="badge" style="background: #E0F2FE; color: #0369A1; font-size: 0.75rem;">Status: <?php echo htmlspecialchars($upcomingAppointment['status']); ?></span>
+                        </div>
 
-                    <div class="appt-actions">
-                        <button class="btn-sm btn-fill">Reschedule</button>
-                        <button class="btn-sm btn-outline">Cancel</button>
-                    </div>
+                        <div class="appt-actions">
+                            <button class="btn-sm btn-fill" onclick="window.location.href='appointment.php'">View All</button>
+                            <button class="btn-sm btn-outline" onclick="alert('Please contact the clinic to reschedule or cancel this appointment.')">Manage</button>
+                        </div>
+                    <?php else: ?>
+                        <div style="text-align: center; padding: 2rem 0;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🗓️</div>
+                            <p style="color: var(--text-light); margin-bottom: 1.5rem;">No upcoming appointments found.</p>
+                            <a href="appointment.php" class="btn-sm btn-fill" style="text-decoration: none; display: inline-block;">Book Now</a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -1152,37 +1224,58 @@ $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
                 </div>
             </section>
  -->
-            <!-- Doctor Visits (Old UI) -->
+            <!-- Doctor Visits -->
             <section class="visits-section">
                 <div class="section-header-row">
                     <h2 class="section-title">My Doctor Visits</h2>
-                    <a href="#" class="view-all">View All <i class="ri-arrow-right-s-line"></i></a>
+                    <a href="appointment.php" class="view-all">View All <i class="ri-arrow-right-s-line"></i></a>
                 </div>
 
                 <div class="doctors-grid">
-                    <div class="visit-card">
-                        <div class="visit-left">
-                            <div class="doc-avatar">👨‍⚕️</div>
-                            <div class="doc-info">
-                                <h4>Dr. Mehta</h4>
-                                <p>Cardiologist</p>
+                    <?php if (!empty($allVisits)): ?>
+                        <?php foreach ($allVisits as $visit): ?>
+                            <div class="visit-card">
+                                <div class="visit-left">
+                                    <div class="doc-avatar">
+                                        <?php if (!empty($visit['image_path']) && file_exists($visit['image_path'])): ?>
+                                            <img src="<?php echo htmlspecialchars($visit['image_path']); ?>" alt="Doctor" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                        <?php else: ?>
+                                            👨‍⚕️
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="doc-info">
+                                        <h4><?php echo htmlspecialchars($visit['doctor_name']); ?></h4>
+                                        <p><?php echo htmlspecialchars($visit['specialization']); ?></p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                                    <div style="font-weight: 500;"><?php echo date('d/m/Y', strtotime($visit['appointment_date'])); ?></div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light);"><?php echo date('h:i A', strtotime($visit['appointment_time'])); ?></div>
+                                    <span class="badge" style="
+                                        font-size: 0.7rem; 
+                                        padding: 2px 8px; 
+                                        border-radius: 12px;
+                                        background: <?php 
+                                            echo ($visit['status'] == 'Completed') ? '#DCFCE7' : 
+                                                 (($visit['status'] == 'Cancelled') ? '#FEE2E2' : '#E0F2FE'); 
+                                        ?>;
+                                        color: <?php 
+                                            echo ($visit['status'] == 'Completed') ? '#166534' : 
+                                                 (($visit['status'] == 'Cancelled') ? '#991B1B' : '#0369A1'); 
+                                        ?>;
+                                    ">
+                                        <?php echo htmlspecialchars($visit['status']); ?>
+                                    </span>
+                                </div>
+                                <a href="appointment.php" class="btn-view">Details</a>
                             </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div style="grid-column: span 2; text-align: center; padding: 2rem; background: var(--white); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+                            <p style="color: var(--text-light); margin-bottom: 1rem;">No doctor visits yet.</p>
+                            <a href="appointment.php" class="btn-sm btn-fill" style="text-decoration: none; display: inline-block;">Book Appointment</a>
                         </div>
-                        <div style="font-weight: 500;">12/01/2024</div>
-                        <a href="#" class="btn-view">View Details</a>
-                    </div>
-
-                    <div class="visit-card">
-                        <div class="visit-left">
-                            <div class="doc-avatar">👩‍⚕️</div>
-                            <div class="doc-info">
-                                <h4>Dr. Rao</h4>
-                                <p>Endocrinologist</p>
-                            </div>
-                        </div>
-                        <div style="font-weight: 500;">05/03/2023</div>
-                        <a href="#" class="btn-view">View Details</a>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </section>
 
@@ -1205,6 +1298,7 @@ $firstName = !empty($fullName) ? explode(' ', $fullName)[0] : 'Patient';
             </div>
 
         </div>
+        <?php include 'footer.php'; ?>
     </main>
 
     <!-- Update Profile Modal -->

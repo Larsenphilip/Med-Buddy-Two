@@ -331,6 +331,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             <a href="index.html" class="back-home">← Back to Home</a>
         </div>
+        <?php include 'footer.php'; ?>
     </div>
 
 </body>

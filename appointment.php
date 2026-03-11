@@ -30,6 +30,17 @@ if ($result->num_rows > 0) {
 // Get unique specializations for filter
 $specializations = array_keys($doctors_by_spec);
 sort($specializations);
+
+// Fetch patient data if logged in
+$patient = null;
+if (isset($_SESSION['patient_id'])) {
+    $patient_id_id = $_SESSION['patient_id'];
+    $sql_patient = "SELECT * FROM patients WHERE patient_id = ?";
+    $stmt_p = $conn->prepare($sql_patient);
+    $stmt_p->bind_param("s", $patient_id_id);
+    $stmt_p->execute();
+    $patient = $stmt_p->get_result()->fetch_assoc();
+}
 ?>
 
 <!DOCTYPE html>
@@ -1326,6 +1337,18 @@ sort($specializations);
         function openBookingModal(id, name) {
             document.getElementById("doctorId").value = id;
             document.getElementById("modalDeviceName").innerText = "Booking with " + name;
+
+            // Auto-fill if user is logged in
+            <?php if(isset($_SESSION['patient_id'])): ?>
+                document.getElementById("name").value = "<?php echo addslashes($patient['full_name'] ?? ''); ?>";
+                document.getElementById("email").value = "<?php echo addslashes($patient['email'] ?? ''); ?>";
+                document.getElementById("phone").value = "<?php echo addslashes($patient['phone_number'] ?? ''); ?>";
+                // Optionally make them readonly if we want to enforce profile data
+                // document.getElementById("name").readOnly = true;
+                // document.getElementById("email").readOnly = true;
+                // document.getElementById("phone").readOnly = true;
+            <?php endif; ?>
+
             modal.style.display = "block";
             document.body.style.overflow = 'hidden'; 
             
@@ -1334,7 +1357,7 @@ sort($specializations);
                 initDateWheel();
             }, 100);
             
-            form.reset();
+            // form.reset(); // Don't reset if we want to keep auto-filled values
             submitBtn.disabled = true;
         }
 
@@ -1510,6 +1533,7 @@ sort($specializations);
             });
         }
     </script>
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>

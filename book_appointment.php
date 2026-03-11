@@ -70,16 +70,33 @@ if ($checkResult->num_rows > 0) {
 }
 
 // Insert the appointment
-$insertQuery = "INSERT INTO appointments (doctor_id, patient_name, patient_email, patient_phone, appointment_date, appointment_time, status) 
-                VALUES (?, ?, ?, ?, ?, ?, 'Pending')";
+session_start();
+$patient_id_val = isset($_SESSION['patient_id']) ? $_SESSION['patient_id'] : null;
+
+$insertQuery = "INSERT INTO appointments (patient_id, doctor_id, patient_name, patient_email, patient_phone, appointment_date, appointment_time, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')";
 $stmt = $conn->prepare($insertQuery);
-$stmt->bind_param("isssss", $doctor_id, $patient_name, $patient_email, $patient_phone, $appointment_date, $appointment_time);
+$stmt->bind_param("sisssss", $patient_id_val, $doctor_id, $patient_name, $patient_email, $patient_phone, $appointment_date, $appointment_time);
 
 if ($stmt->execute()) {
+    $appointment_id = $stmt->insert_id;
+    
+    // Create Notification for the Doctor
+    $notif_title = "New Appointment: " . $patient_name;
+    $notif_message = "Patient " . $patient_name . " (" . ($patient_id_val ?? 'Guest') . ") has requested an appointment for " . date('d M Y', strtotime($appointment_date)) . " at " . date('h:i A', strtotime($appointment_time)) . ".";
+    
+    $notif_sql = "INSERT INTO notifications (user_id, user_type, title, message) VALUES (?, 'doctor', ?, ?)";
+    $notif_stmt = $conn->prepare($notif_sql);
+    if ($notif_stmt) {
+        $notif_stmt->bind_param("iss", $doctor_id, $notif_title, $notif_message);
+        $notif_stmt->execute();
+        $notif_stmt->close();
+    }
+
     echo json_encode([
         'success' => true, 
         'message' => 'Appointment booked successfully',
-        'appointment_id' => $stmt->insert_id
+        'appointment_id' => $appointment_id
     ]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Failed to book appointment: ' . $conn->error]);
