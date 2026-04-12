@@ -121,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 );
 
                 if ($stmt->execute()) {
-                    $success = "Registration successful! Your Doctor ID is <b>$doctor_identity</b> and Email is <b>$email</b>. <a href='doctor_login.php'>Login Here</a>";
+                    $success = "Registration successful! Your Doctor ID is <b>$doctor_identity</b>. Your account is pending administrative verification. You will be able to <a href='doctor_login.php'>Login Here</a> once approved.";
                 } else {
                     $error = "Database Error: " . $stmt->error;
                 }

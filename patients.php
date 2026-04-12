@@ -76,18 +76,16 @@ if (!empty($patient['phone_number']) || !empty($patient['email'])) {
 
 // Fetch all doctor visits (history)
 $allVisits = [];
-if (!empty($patient['phone_number']) || !empty($patient['email']) || !empty($patient['patient_id'])) {
     $visitsSql = "SELECT a.*, d.name AS doctor_name, d.specialization, d.image_path 
                   FROM appointments a 
                   JOIN doctors d ON a.doctor_id = d.id 
-                  WHERE (a.patient_phone = ? OR a.patient_email = ? OR a.patient_id = ?) 
+                  WHERE (a.patient_phone = ? OR a.patient_email = ?) 
                   ORDER BY a.appointment_date DESC, a.appointment_time DESC";
     $visitsStmt = $conn->prepare($visitsSql);
     if ($visitsStmt) {
         $pPhone = $patient['phone_number'] ?? '';
         $pEmail = $patient['email'] ?? '';
-        $pID = $patient['patient_id'] ?? '';
-        $visitsStmt->bind_param("sss", $pPhone, $pEmail, $pID);
+        $visitsStmt->bind_param("ss", $pPhone, $pEmail);
         $visitsStmt->execute();
         $visitsResult = $visitsStmt->get_result();
         while ($row = $visitsResult->fetch_assoc()) {
@@ -95,7 +93,6 @@ if (!empty($patient['phone_number']) || !empty($patient['email']) || !empty($pat
         }
         $visitsStmt->close();
     }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">

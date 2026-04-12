@@ -8,7 +8,7 @@ from openai import OpenAI
 # ---------------- CONFIGURATION ----------------
 # Standard Local Ollama Config
 OLLAMA_API_URL = "http://localhost:11434/v1"
-OLLAMA_MODEL = "llama3"
+OLLAMA_MODEL = "phi3"
 
 # Database Config
 DB_CONFIG = {
@@ -54,13 +54,17 @@ WHERE patient_id = %s
                 if isinstance(val, (date, datetime)): patient[key] = str(val)
                 elif isinstance(val, Decimal): patient[key] = float(val)
             
+            # Remove sensitive info before sending to AI
+            patient.pop('email', None)
+            patient.pop('password', None)
+            
             for img in images:
                 if isinstance(img['taken_at'], (date, datetime)): img['taken_at'] = str(img['taken_at'])
 
             documents = []
 
             for img in images:
-                doc_type = img.get("image_type", "Document")
+                doc_name = img.get("description", img.get("image_type", "Document"))
                 img_date = img.get("taken_at", "Unknown date")
                 path = img.get("file_path", "")
 
@@ -70,7 +74,7 @@ WHERE patient_id = %s
                     link = "No file available"
                 
                 documents.append({
-                    "type": doc_type,
+                    "name": doc_name,
                     "date": img_date,
                     "link": link
                 })
@@ -145,17 +149,21 @@ def generate_ai_summary(patient_data):
 You are a hospital AI assistant.
 
 Generate a clinical summary for doctors strictly using the following headings:
-**Patient Information**
-**Medical Conditions**
-**Allergies**
-**Uploaded Medical Records**
-**Risk Notes**
-**Emergency Contact**
+Patient Information
+Medical Conditions
+Allergies
+Uploaded Medical Records
+Risk Notes
+Emergency Contact
 
 When listing 'Uploaded Medical Records', ALWAYS output clickable markdown hyperlinks to the documents.
-Format it EXACTLY like this: - [View Document Type](URL)
+Format it EXACTLY like this (replace TYPE with the document type): TYPE: [view document]({URL})
 
-Only use the links provided in the data. Do not use '#' for headings, just use bold text. Do not mention dates in the document names. Do not invent information.
+Do NOT use '-' or '*' bullet points for lists. For Patient Information, output the Key: Value directly without any bullet points before the Key. Example:
+Full Name: John Doe
+Date of Birth: 1990-01-01
+
+Do not use '#' or '**' for headings, just use bold text. Do not mention dates in the document names. Do not invent information.
 """
     
     try:
@@ -203,51 +211,50 @@ def generate_smart_template_summary(data):
     summary = ""
     
     # 1. Patient Information
-    summary += "**Patient Information**\n"
-    summary += f"- **Name:** {p.get('full_name', 'N/A')}\n"
-    summary += f"- **Age:** {age}\n"
-    summary += f"- **Gender:** {p.get('gender', 'N/A')}\n"
-    summary += f"- **Blood Group:** {p.get('blood_group', 'N/A')}\n"
-    summary += f"- **Height:** {p.get('height', 'N/A')} cm\n"
-    summary += f"- **Weight:** {p.get('weight', 'N/A')} kg\n"
-    summary += f"- **Contact:** {p.get('phone_number', 'N/A')}\n\n"
+    summary += "Patient Information\n"
+    summary += f"Name: {p.get('full_name', 'N/A')}\n"
+    summary += f"Age: {age}\n"
+    summary += f"Gender: {p.get('gender', 'N/A')}\n"
+    summary += f"Blood Group: {p.get('blood_group', 'N/A')}\n"
+    summary += f"Height: {p.get('height', 'N/A')} cm\n"
+    summary += f"Weight: {p.get('weight', 'N/A')} kg\n"
+    summary += f"Contact: {p.get('phone_number', 'N/A')}\n\n"
     
     # 2. Medical Conditions
-    summary += "**Medical Conditions**\n"
+    summary += "Medical Conditions\n"
     conditions = p.get('chronic_conditions', 'None reported')
     summary += f"{conditions}\n\n"
         
     # 3. Allergies
-    summary += "**Allergies**\n"
+    summary += "Allergies\n"
     allergies = p.get('allergies', 'None')
     summary += f"{allergies}\n\n"
 
     # 4. Uploaded Medical Records
-    summary += "**Uploaded Medical Records**\n"
+    summary += "Uploaded Medical Records\n"
     if docs:
         for d in docs:
-            desc = d.get('type', 'Document')
             link = d.get('link', '#')
-            summary += f"- [View {desc}]({link})\n"
+            summary += f"[view document]({link})\n"
     else:
         summary += "No medical documents or imaging uploaded.\n"
 
     # 5. Risk Notes
-    summary += "\n**Risk Notes**\n"
+    summary += "\nRisk Notes\n"
     # Basic rule-based risk induction
     if 'Diabetes' in str(conditions) or 'Hypertension' in str(conditions):
-        summary += "- High cardiovascular risk profile.\n"
+        summary += "High cardiovascular risk profile.\n"
     elif 'Asthma' in str(conditions):
-        summary += "- Respiratory monitoring advised.\n"
+        summary += "Respiratory monitoring advised.\n"
     else:
-        summary += "- No immediate critical risks identified from record.\n"
+        summary += "No immediate critical risks identified from record.\n"
 
     # 6. Emergency Contact
-    summary += "\n**Emergency Contact**\n"
+    summary += "\nEmergency Contact\n"
     e_name = p.get('emergency_contact_name', 'N/A')
     e_phone = p.get('emergency_contact_phone', 'N/A')
-    summary += f"- **Name:** {e_name}\n"
-    summary += f"- **Phone:** {e_phone}\n"
+    summary += f"Name: {e_name}\n"
+    summary += f"Phone: {e_phone}\n"
 
     summary += "\n\n_Generated by Med-Buddy Intelligence System_"
     return summary

@@ -34,9 +34,9 @@ header('Cache-Control: no-cache');
 header('X-Accel-Buffering: no'); // For Nginx
 
 // 4. Command Setup (Matches search_patient.php)
-$venv_python = 'C:\\Users\\LARSEN\\AppData\\Local\\Programs\\Python\\Python312\\python.exe';
+$venv_python = 'C:\\wamp64\\www\\Med-Buddy-Two\\venv\\Scripts\\python.exe';
 $script_path = __DIR__ . DIRECTORY_SEPARATOR . "ai_patient_summary.py";
-$command = "$venv_python \"$script_path\" " . escapeshellarg($patient_id) . " 2>&1";
+$command = "\"$venv_python\" \"$script_path\" " . escapeshellarg($patient_id) . " 2>&1";
 
 // 5. Execute and Stream
 $handle = popen($command, 'r');

@@ -16,9 +16,9 @@ if (!$patient_id) {
 }
 
 // 3. Command Setup
-$venv_python = 'C:\\Users\\LARSEN\\AppData\\Local\\Programs\\Python\\Python312\\python.exe';
+$venv_python = 'C:\\wamp64\\www\\Med-Buddy-Two\\venv\\Scripts\\python.exe';
 $script_path = __DIR__ . DIRECTORY_SEPARATOR . "generate_qr.py";
-$command = "$venv_python \"$script_path\" " . escapeshellarg($patient_id) . " 2>&1";
+$command = "\"$venv_python\" \"$script_path\" " . escapeshellarg($patient_id) . " 2>&1";
 
 // 4. Execute
 $output = shell_exec($command);

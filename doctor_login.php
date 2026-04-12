@@ -6,8 +6,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Retrieve hashed password
-    $sql = "SELECT id, name, email, password FROM doctors WHERE email = ?";
+    // Retrieve hashed password and status
+    $sql = "SELECT id, name, email, password, status FROM doctors WHERE email = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -18,10 +18,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         // Check password (hashed or plain text fallback)
         if (password_verify($password, $doctor['password']) || $password === $doctor['password']) {
-            $_SESSION['doctor_id'] = $doctor['id'];
-            $_SESSION['doctor_name'] = $doctor['name'];
-            header("Location: admin/index.php");
-            exit;
+            if ($doctor['status'] === 'pending') {
+                $error = "Your account is currently pending administrative verification.";
+            } elseif ($doctor['status'] === 'rejected') {
+                $error = "Your account registration has been rejected.";
+            } elseif ($doctor['status'] === 'approved') {
+                $_SESSION['doctor_id'] = $doctor['id'];
+                $_SESSION['doctor_name'] = $doctor['name'];
+                header("Location: admin/index.php");
+                exit;
+            } else {
+                $error = "Unknown account status.";
+            }
         } else {
             $error = "Invalid email or password";
         }

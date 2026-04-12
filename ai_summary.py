@@ -50,6 +50,13 @@ Scans
 Risk Notes
 Emergency Contact
 
+When listing documents, ALWAYS output clickable markdown hyperlinks to the documents.
+Format it EXACTLY like this (replace TYPE with the document type): TYPE: [view document]({{URL}})
+
+Do NOT use '-' or '*' bullet points for lists. Output the Key: Value directly without any bullet points before the Key. Example:
+Full Name: John Doe
+Blood Group: O+
+
 Patient Data:
 {data}
 """
@@ -57,7 +64,7 @@ Patient Data:
 response = requests.post(
     "http://localhost:11434/api/generate",
     json={
-        "model": "llama3",
+        "model": "phi3",
         "prompt": prompt,
         "stream": False
     }

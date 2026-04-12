@@ -56,6 +56,9 @@ if ($result && $result->num_rows > 0) {
         }
         
         try {
+            if (!$sid || !$token) {
+                throw new Exception("Twilio SID or Token is missing in .env file.");
+            }
             $twilio = new Client($sid, $token);
             $verification = $twilio->verify->v2->services($verifySid)
                                              ->verifications
