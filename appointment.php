@@ -907,7 +907,7 @@ if (isset($_SESSION['patient_id'])) {
                         <?php endif; ?>
                     </div>
                     <div class="card-content">
-                        <h3 class="doctor-name"><?php echo htmlspecialchars($doc['name']); ?></h3>
+                        <h3 class="doctor-name">Dr. <?php echo htmlspecialchars($doc['name']); ?></h3>
                         <p class="doctor-designation"><?php echo htmlspecialchars($designation); ?></p>
                         <p class="doctor-department"><?php echo htmlspecialchars($doc['specialization']); ?></p>
                         <button class="btn-request" onclick="openBookingModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>')">Request Appointment</button>
@@ -1336,7 +1336,7 @@ if (isset($_SESSION['patient_id'])) {
 
         function openBookingModal(id, name) {
             document.getElementById("doctorId").value = id;
-            document.getElementById("modalDeviceName").innerText = "Booking with " + name;
+            document.getElementById("modalDeviceName").innerText = "Booking with Dr. " + name;
 
             // Auto-fill if user is logged in
             <?php if(isset($_SESSION['patient_id'])): ?>
